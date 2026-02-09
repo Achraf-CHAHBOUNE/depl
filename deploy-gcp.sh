@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # ============================================================================
-# GCP Deployment Script - Fixed Version
+# GCP Deployment Script - One Command Deploy
 # ============================================================================
-# This script deploys the DGI Invoice Automation app on Google Cloud Platform
-# with proper configuration for external IP access
+# Usage: curl -sSL https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh | bash
+# Or: wget -qO- https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh | bash
 # ============================================================================
 
 set -e
@@ -13,6 +13,19 @@ echo "=============================================="
 echo "🚀 DGI Invoice Automation - GCP Deployment"
 echo "=============================================="
 echo ""
+
+# ============================================================================
+# Check for API Key
+# ============================================================================
+if [ -z "$ANTHROPIC_API_KEY" ]; then
+    echo "⚠️  ANTHROPIC_API_KEY not found in environment"
+    echo ""
+    echo "Please enter your Anthropic API key:"
+    echo "(Get it from: https://console.anthropic.com/)"
+    read -r ANTHROPIC_API_KEY
+    export ANTHROPIC_API_KEY
+    echo ""
+fi
 
 # ============================================================================
 # Get External IP
@@ -93,13 +106,27 @@ echo ""
 # ============================================================================
 echo "⚙️  Step 6/8: Configuring environment variables..."
 
+# Create credentials directory if it doesn't exist
+mkdir -p credentials
+
+# Check for Google credentials
+if [ ! -f "credentials/google-credentials.json" ]; then
+    echo "⚠️  Google Cloud credentials not found"
+    echo ""
+    echo "Please paste your Google Cloud credentials JSON content:"
+    echo "(Press Ctrl+D when done)"
+    cat > credentials/google-credentials.json
+    echo ""
+    echo "   ✅ Google credentials saved"
+fi
+
 # Create .env file for deployment
 cat > .env << EOF
 # Deployment Configuration
 VITE_API_URL=http://$EXTERNAL_IP:8000
 ALLOWED_ORIGINS=http://$EXTERNAL_IP:8080,http://localhost:8080,http://localhost:5173
 JWT_SECRET_KEY=change-this-in-production-$(openssl rand -hex 32)
-ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
 EOF
 
 echo "   ✅ Environment configured"
