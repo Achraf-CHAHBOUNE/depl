@@ -3,8 +3,8 @@
 # ============================================================================
 # GCP Deployment Script - One Command Deploy
 # ============================================================================
-# Usage: curl -sSL https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh | bash
-# Or: wget -qO- https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh | bash
+# Usage: bash <(curl -sSL https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh)
+# Or: bash <(wget -qO- https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh)
 # ============================================================================
 
 set -e
@@ -13,6 +13,17 @@ echo "=============================================="
 echo "🚀 DGI Invoice Automation - GCP Deployment"
 echo "=============================================="
 echo ""
+
+# ============================================================================
+# Install curl if not present
+# ============================================================================
+if ! command -v curl &> /dev/null; then
+    echo "📦 Installing curl..."
+    sudo apt-get update -qq
+    sudo apt-get install -y curl
+    echo "   ✅ curl installed"
+    echo ""
+fi
 
 # ============================================================================
 # Check for API Key
