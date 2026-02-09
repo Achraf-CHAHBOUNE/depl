@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Invoice Intelligence - Corporate Professional Design System
+   Deep navy blues, structured layouts, trustworthy feel
+   All colors in HSL format */
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    /* Cards and surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    /* Popovers and modals */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary - Deep Navy (trustworthy, corporate) */
+    --primary: 213 50% 23%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Secondary - Slate blue */
+    --secondary: 214 20% 92%;
+    --secondary-foreground: 213 50% 23%;
+
+    /* Muted - Subtle grays */
+    --muted: 210 15% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent - Professional blue */
+    --accent: 210 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Status colors */
+    --success: 142 70% 40%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --info: 210 80% 55%;
+    --info-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 214 25% 88%;
+    --input: 214 25% 88%;
+    --ring: 213 50% 23%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar - Professional dark */
+    --sidebar-background: 213 50% 18%;
+    --sidebar-foreground: 210 30% 90%;
+    --sidebar-primary: 210 80% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 213 40% 25%;
+    --sidebar-accent-foreground: 210 30% 95%;
+    --sidebar-border: 213 40% 28%;
+    --sidebar-ring: 210 80% 55%;
+    --sidebar-muted: 213 30% 35%;
+  }
+
+  .dark {
+    --background: 215 30% 10%;
+    --foreground: 210 30% 95%;
+
+    --card: 215 30% 12%;
+    --card-foreground: 210 30% 95%;
+
+    --popover: 215 30% 12%;
+    --popover-foreground: 210 30% 95%;
+
+    --primary: 210 80% 60%;
+    --primary-foreground: 215 30% 10%;
+
+    --secondary: 215 25% 20%;
+    --secondary-foreground: 210 30% 95%;
+
+    --muted: 215 25% 18%;
+    --muted-foreground: 215 20% 60%;
+
+    --accent: 210 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 40% 98%;
+
+    --info: 210 80% 60%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 215 25% 22%;
+    --input: 215 25% 22%;
+    --ring: 210 80% 55%;
+
+    --sidebar-background: 215 35% 8%;
+    --sidebar-foreground: 210 30% 90%;
+    --sidebar-primary: 210 80% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 30% 15%;
+    --sidebar-accent-foreground: 210 30% 95%;
+    --sidebar-border: 215 30% 18%;
+    --sidebar-ring: 210 80% 55%;
+    --sidebar-muted: 215 25% 30%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for professional look */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  /* Data table row hover */
+  .data-row-hover {
+    @apply transition-colors duration-150 hover:bg-muted/50;
+  }
+
+  /* Form field focus ring */
+  .field-focus {
+    @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1;
+  }
+
+  /* Status indicator pulse */
+  .status-pulse {
+    animation: pulse-subtle 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+}

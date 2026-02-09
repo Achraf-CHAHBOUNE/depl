@@ -1,0 +1,174 @@
+services:
+  # =====================================================
+  # DATABASE
+  # =====================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: dgi-postgres
+    environment:
+      POSTGRES_USER: dgi_user
+      POSTGRES_PASSWORD: dgi_password
+      POSTGRES_DB: dgi_compliance
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dgi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dgi_user -d dgi_compliance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # =====================================================
+  # OCR SERVICE
+  # =====================================================
+  ocr-service:
+    build: ./backend/ocr-service
+    container_name: dgi-ocr-service
+    ports:
+      - "8001:8001"
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/credentials/google-credentials.json
+    volumes:
+      - ./credentials:/app/credentials:ro
+      - ./shared/uploads:/app/uploads
+    networks:
+      - dgi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # =====================================================
+  # INTELLIGENCE SERVICE
+  # =====================================================
+  intelligence-service:
+    build: ./backend/intelligence-service
+    container_name: dgi-intelligence-service
+    ports:
+      - "8004:8004"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: claude-sonnet-4-20250514
+      AMOUNT_TOLERANCE: 0.01
+      MIN_CONFIDENCE_SCORE: 60
+      PENALTY_BASE_RATE: 2.25
+      PENALTY_MONTHLY_INCREMENT: 0.85
+    volumes:
+      - ./shared/uploads:/app/uploads
+      - ./shared/logs/intelligence-service:/app/logs
+    networks:
+      - dgi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # =====================================================
+  # ORCHESTRATOR SERVICE
+  # =====================================================
+  orchestrator-service:
+    build: ./backend/orchestrator-service
+    container_name: dgi-orchestrator-service
+    ports:
+      - "8005:8005"
+    environment:
+      OCR_SERVICE_URL: http://ocr-service:8001
+      INTELLIGENCE_SERVICE_URL: http://intelligence-service:8004
+      DATABASE_URL: postgresql://dgi_user:dgi_password@postgres:5432/dgi_compliance
+      STORAGE_PATH: /app/uploads
+    volumes:
+      - ./shared/uploads:/app/uploads
+      - ./shared/logs/orchestrator-service:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ocr-service:
+        condition: service_healthy
+      intelligence-service:
+        condition: service_healthy
+    networks:
+      - dgi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # =====================================================
+  # API GATEWAY
+  # =====================================================
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: dgi-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-this-in-production}
+      ORCHESTRATOR_URL: http://orchestrator-service:8005
+      DATABASE_URL: postgresql://dgi_user:dgi_password@postgres:5432/dgi_compliance
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://localhost:5173}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      orchestrator-service:
+        condition: service_healthy
+    networks:
+      - dgi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # =====================================================
+  # FRONTEND (VITE)
+  # =====================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: dgi-frontend
+    ports:
+      - "8080:8080"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - dgi-network
+    restart: unless-stopped
+
+# =====================================================
+# VOLUMES
+# =====================================================
+volumes:
+  postgres_data:
+
+# =====================================================
+# NETWORK
+# =====================================================
+networks:
+  dgi-network:
+    driver: bridge
