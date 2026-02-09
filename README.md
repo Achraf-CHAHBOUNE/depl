@@ -4,13 +4,9 @@ Système automatisé de conformité fiscale pour la DGI (Direction Générale de
 
 ## 🚀 Quick Deploy to GCP
 
-**One command deployment:**
+**One command deployment (works on fresh Ubuntu VM):**
 
 ```bash
-# If you have curl:
-bash <(curl -sSL https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh)
-
-# Or with wget (always available on Ubuntu):
 bash <(wget -qO- https://raw.githubusercontent.com/Achraf-CHAHBOUNE/depl/main/deploy-gcp.sh)
 ```
 
